@@ -69,30 +69,46 @@ namespace Cysharp.Threading.TasksTests
 
 #if ENABLE_UNITYWEBREQUEST && (!UNITY_2019_1_OR_NEWER || UNITASK_WEBREQUEST_SUPPORT)
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator UnityWebRequest_Completed() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
+            // 构建文件路径，指向项目中的 "sample_texture.png" 文件
             var filePath = System.IO.Path.Combine(Application.dataPath, "Tests", "Resources", "sample_texture.png");
+            // 发送UnityWebRequest请求，并获取异步操作
             var asyncOperation = UnityWebRequest.Get($"file://{filePath}").SendWebRequest();
+            // 将异步操作转换为UniTask以便在异步测试中使用
             await asyncOperation.ToUniTask();
 
+            // 断言异步操作是否已完成
             asyncOperation.isDone.Should().BeTrue();
+            // 断言WebRequest结果是否为成功
             asyncOperation.webRequest.result.Should().Be(UnityWebRequest.Result.Success);
         });
         
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator UnityWebRequest_CancelOnPlayerLoop() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
+            // 创建一个取消标记源
             var cts = new CancellationTokenSource();
+            // 构建文件路径，指向项目中的 "sample_texture.png" 文件
             var filePath = System.IO.Path.Combine(Application.dataPath, "Tests", "Resources", "sample_texture.png");
+            // 发送UnityWebRequest请求，并获取异步操作，同时使用取消标记
             var task = UnityWebRequest.Get($"file://{filePath}").SendWebRequest().ToUniTask(cancellationToken: cts.Token);
             
+            // 取消任务
             cts.Cancel();
+            // 断言任务状态是否为Pending
             task.Status.Should().Be(UniTaskStatus.Pending);
             
+            // 等待一帧
             await UniTask.NextFrame();
+            // 断言任务状态是否为Canceled
             task.Status.Should().Be(UniTaskStatus.Canceled);
         });
-        
+
         [Test]
         public void UnityWebRequest_CancelImmediately()
         {
