@@ -234,51 +234,49 @@ namespace Cysharp.Threading.TasksTests
         });
 
         [UnityTest]
+        // 使用 UnityTest 标记，表示这是一个 Unity 测试方法
         public IEnumerator WaitUntilValueChanged() => UniTask.ToCoroutine(async () =>
         {
-            var v = new MyMyClass { MyProperty = 99 };
+            // 在异步方法中执行测试
+            var v = new MyMyClass { MyProperty = 99 }; // 创建一个 MyMyClass 实例，并设置 MyProperty 初始值为 99
 
+            // 延迟10帧后将 MyProperty 设置为 1000
             UniTask.DelayFrame(10, PlayerLoopTiming.PostLateUpdate).ContinueWith(() => v.MyProperty = 1000).Forget();
 
+            // 记录开始帧数
             var startFrame = Time.frameCount;
+
+            // 等待 MyProperty 的值发生改变，等待期间检查 EarlyUpdate 阶段
             await UniTask.WaitUntilValueChanged(v, x => x.MyProperty, PlayerLoopTiming.EarlyUpdate);
 
+            // 计算帧数差异
             var diff = Time.frameCount - startFrame;
+            // 断言帧数差异是否为11
             diff.Should().Be(11);
         });
 
 #if !UNITY_WEBGL
 
         [UnityTest]
+        // 使用 UnityTest 标记，表示这是一个 Unity 测试方法
         public IEnumerator SwitchTo() => UniTask.ToCoroutine(async () =>
         {
-            await UniTask.Yield();
+            // 在异步方法中执行测试
+            await UniTask.Yield(); // 等待一帧，确保在主线程执行
 
-            var currentThreadId = Thread.CurrentThread.ManagedThreadId;
+            var currentThreadId = Thread.CurrentThread.ManagedThreadId; // 记录当前线程的 ID
 
+            await UniTask.SwitchToThreadPool(); // 切换到线程池执行任务
 
+            var switchedThreadId = Thread.CurrentThread.ManagedThreadId; // 记录切换后的线程 ID
 
-            await UniTask.SwitchToThreadPool();
-            //await UniTask.SwitchToThreadPool();
-            //await UniTask.SwitchToThreadPool();
+            currentThreadId.Should().NotBe(switchedThreadId); // 断言当前线程和切换后的线程不一致
 
+            await UniTask.Yield(); // 再次等待一帧，确保任务执行回到了主线程
 
+            var switchedThreadId2 = Thread.CurrentThread.ManagedThreadId; // 再次记录当前线程的 ID
 
-
-
-
-            var switchedThreadId = Thread.CurrentThread.ManagedThreadId;
-
-
-
-            currentThreadId.Should().NotBe(switchedThreadId);
-
-
-            await UniTask.Yield();
-
-            var switchedThreadId2 = Thread.CurrentThread.ManagedThreadId;
-
-            currentThreadId.Should().Be(switchedThreadId2);
+            currentThreadId.Should().Be(switchedThreadId2); // 断言当前线程和切换后的线程一致
         });
 
 #endif
@@ -328,36 +326,47 @@ namespace Cysharp.Threading.TasksTests
         //});
 
         [UnityTest]
+        // 使用 UnityTest 标记，表示这是一个 Unity 测试方法
         public IEnumerator ExceptionlessCancellation() => UniTask.ToCoroutine(async () =>
         {
-            var cts = new CancellationTokenSource();
+            // 在异步方法中执行测试
+            var cts = new CancellationTokenSource(); // 创建 CancellationTokenSource 对象
 
+            // 延迟10帧后取消 CancellationTokenSource 对象
             UniTask.DelayFrame(10).ContinueWith(() => cts.Cancel()).Forget();
 
-            var first = Time.frameCount;
+            var first = Time.frameCount; // 记录当前帧数
+            // 等待100帧，同时传入 CancellationToken，但忽略取消异常的抛出
             var canceled = await UniTask.DelayFrame(100, cancellationToken: cts.Token).SuppressCancellationThrow();
 
-            var r = (Time.frameCount - first);
+            var r = (Time.frameCount - first); // 计算帧数差
+            // 断言差值在9到11之间
             (9 < r && r < 11).Should().BeTrue();
+            // 断言任务是否被取消
             canceled.Should().Be(true);
         });
 
         [UnityTest]
+        // 使用 UnityTest 标记，表示这是一个 Unity 测试方法
         public IEnumerator ExceptionCancellation() => UniTask.ToCoroutine(async () =>
         {
-            var cts = new CancellationTokenSource();
+            // 在异步方法中执行测试
+            var cts = new CancellationTokenSource(); // 创建 CancellationTokenSource 对象
 
+            // 延迟10帧后取消 CancellationTokenSource 对象
             UniTask.DelayFrame(10).ContinueWith(() => cts.Cancel()).Forget();
 
             bool occur = false;
             try
             {
+                // 使用 UniTask.DelayFrame 方法等待100帧，同时传入 CancellationToken
                 await UniTask.DelayFrame(100, cancellationToken: cts.Token);
             }
             catch (OperationCanceledException)
             {
                 occur = true;
             }
+            // 断言是否捕获到 OperationCanceledException 异常
             occur.Should().BeTrue();
         });
 
