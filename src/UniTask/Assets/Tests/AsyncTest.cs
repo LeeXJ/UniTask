@@ -40,17 +40,28 @@ namespace Cysharp.Threading.TasksTests
 
         public struct MyJob : IJob
         {
+            // 定义结构体字段
+
+            // 循环次数
             public int loopCount;
+            // 用于传入和传出数据的 NativeArray
             public NativeArray<int> inOut;
+            // 结果值
             public int result;
 
+            // 实现 IJob 接口的 Execute 方法，用于执行并行计算任务
             public void Execute()
             {
+                // 初始化结果值为0
                 result = 0;
+
+                // 循环执行一定次数，递增结果值
                 for (int i = 0; i < loopCount; i++)
                 {
                     result++;
                 }
+
+                // 将结果值写入传入传出的 NativeArray 中的第一个元素
                 inOut[0] = result;
             }
         }
