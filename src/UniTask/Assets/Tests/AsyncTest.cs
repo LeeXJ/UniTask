@@ -151,21 +151,29 @@ namespace Cysharp.Threading.TasksTests
         });
 
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator WhenAny() => UniTask.ToCoroutine(async () =>
         {
-            var a = UniTask.FromResult(999);
-            var b = UniTask.Yield(PlayerLoopTiming.Update, CancellationToken.None).AsAsyncUnitUniTask();
-            var c = UniTask.DelayFrame(99).AsAsyncUnitUniTask();
+            // 在异步方法中执行测试
+            // 创建三个不同的UniTask，分别表示任务a、b、c
+            var a = UniTask.FromResult(999); // 创建一个已完成的UniTask，结果为999
+            var b = UniTask.Yield(PlayerLoopTiming.Update, CancellationToken.None).AsAsyncUnitUniTask(); // 创建一个在Update阶段暂停的UniTask
+            var c = UniTask.DelayFrame(99).AsAsyncUnitUniTask(); // 创建一个在99帧后完成的UniTask
 
+            // 使用UniTask.WhenAny等待其中任意一个任务完成
             var (win, a2, b2, c2) = await UniTask.WhenAny(a, b, c);
-            win.Should().Be(0);
-            a2.Should().Be(999);
+
+            // 断言返回的结果是否符合预期
+            win.Should().Be(0); // win应该为0，表示任务a完成
+            a2.Should().Be(999); // 任务a的结果应为999
         });
 
         [UnityTest]
+        // 使用 UnityTest 标记，表示这是一个 Unity 测试方法
         public IEnumerator BothEnumeratorCheck() => UniTask.ToCoroutine(async () =>
         {
-            await ToaruCoroutineEnumerator(); // wait 5 frame:)
+            // 在异步方法中执行测试
+            await ToaruCoroutineEnumerator(); // 调用 ToaruCoroutineEnumerator 方法，等待其完成
         });
 
         //[UnityTest]
