@@ -15,35 +15,54 @@ namespace Cysharp.Threading.TasksTests
     public class AsyncOperationTest
     {
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator ResourcesLoad_Completed() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
+            // 异步加载资源
             var asyncOperation = Resources.LoadAsync<Texture2D>("sample_texture");
+            // 将异步操作转换为UniTask以便在异步测试中使用
             await asyncOperation.ToUniTask();
+            // 断言异步操作是否完成
             asyncOperation.isDone.Should().BeTrue();
+            // 断言加载的资源类型是否为Texture2D
             asyncOperation.asset.GetType().Should().Be(typeof(Texture2D));
         });
         
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator ResourcesLoad_CancelOnPlayerLoop() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
+            // 创建一个取消标记源
             var cts = new CancellationTokenSource();
+            // 使用取消标记在后台线程上异步加载资源，但不立即取消任务
             var task = Resources.LoadAsync<Texture>("sample_texture").ToUniTask(cancellationToken: cts.Token, cancelImmediately: false);
             
+            // 取消任务
             cts.Cancel();
+            // 断言任务状态是否为Pending
             task.Status.Should().Be(UniTaskStatus.Pending);
 
+            // 等待一帧
             await UniTask.NextFrame();
+            // 断言任务状态是否为Canceled
             task.Status.Should().Be(UniTaskStatus.Canceled);
         });
-        
+
         [Test]
+        // 使用Test标记，表示这是一个测试方法
         public void ResourcesLoad_CancelImmediately()
         {
             {
+                // 创建一个取消标记源
                 var cts = new CancellationTokenSource();
+                // 使用取消标记在后台线程上异步加载资源，并立即取消任务
                 var task = Resources.LoadAsync<Texture>("sample_texture").ToUniTask(cancellationToken: cts.Token, cancelImmediately: true);
 
+                // 取消任务
                 cts.Cancel();
+                // 断言任务状态是否为Canceled
                 task.Status.Should().Be(UniTaskStatus.Canceled);
             }
         }
