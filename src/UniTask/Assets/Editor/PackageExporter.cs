@@ -11,25 +11,36 @@ public static class PackageExporter
     [MenuItem("Tools/Export Unitypackage")]
     public static void Export()
     {
+        // 导出根目录
         var root = "Plugins/UniTask";
+        // 获取根目录中的版本信息
         var version = GetVersion(root);
 
+        // 根据版本信息构建导出文件名
         var fileName = string.IsNullOrEmpty(version) ? "UniTask.unitypackage" : $"UniTask.{version}.unitypackage";
+        // 构建导出文件的路径
         var exportPath = "./" + fileName;
 
+        // 获取根目录的绝对路径
         var path = Path.Combine(Application.dataPath, root);
+        // 获取根目录下所有文件（包括子目录）的路径
         var assets = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories)
+            // 筛选出.cs、.asmdef、.json和.meta文件
             .Where(x => Path.GetExtension(x) == ".cs" || Path.GetExtension(x) == ".asmdef" || Path.GetExtension(x) == ".json" || Path.GetExtension(x) == ".meta")
+            // 将文件路径转换为相对于Assets文件夹的路径
             .Select(x => "Assets" + x.Replace(Application.dataPath, "").Replace(@"\", "/"))
             .ToArray();
 
+        // 打印将要导出的文件列表到Unity控制台
         UnityEngine.Debug.Log("Export below files" + Environment.NewLine + string.Join(Environment.NewLine, assets));
 
+        // 导出Unity包
         AssetDatabase.ExportPackage(
-            assets,
-            exportPath,
-            ExportPackageOptions.Default);
+            assets, // 要导出的文件列表
+            exportPath, // 导出路径
+            ExportPackageOptions.Default); // 导出选项
 
+        // 打印导出完成的信息到Unity控制台
         UnityEngine.Debug.Log("Export complete: " + Path.GetFullPath(exportPath));
     }
 
