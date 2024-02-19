@@ -69,22 +69,33 @@ namespace Cysharp.Threading.TasksTests
 #if !UNITY_WEBGL
 
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator DelayAnd() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
+            // 在下一个 PostLateUpdate 阶段暂停执行，等待渲染帧结束
             await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
 
+            // 记录开始时间
             var time = Time.realtimeSinceStartup;
 
+            // 缩小时间缩放系数以减慢时间流逝
             Time.timeScale = 0.5f;
             try
             {
+                // 等待3秒钟
                 await UniTask.Delay(TimeSpan.FromSeconds(3));
 
+                // 计算经过的时间
                 var elapsed = Time.realtimeSinceStartup - time;
+                
+                // 断言实际经过的时间是否为6秒钟
+                // 这里使用了 Math.Round 方法将经过的时间四舍五入到最接近的整数秒，并将其与6进行比较
                 ((int)Math.Round(TimeSpan.FromSeconds(elapsed).TotalSeconds, MidpointRounding.ToEven)).Should().Be(6);
             }
             finally
             {
+                // 恢复时间缩放系数为正常值
                 Time.timeScale = 1.0f;
             }
         });
