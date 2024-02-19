@@ -192,30 +192,44 @@ namespace Cysharp.Threading.TasksTests
         }
 
         [UnityTest]
+        // 使用 UnityTest 标记，表示这是一个 Unity 测试方法
         public IEnumerator WaitUntil() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
             bool t = false;
 
+            // 延迟10帧后设置t为true
             UniTask.DelayFrame(10, PlayerLoopTiming.PostLateUpdate).ContinueWith(() => t = true).Forget();
 
+            // 记录开始帧数
             var startFrame = Time.frameCount;
+            // 等待直到 t 变为 true，等待期间检查 EarlyUpdate 阶段
             await UniTask.WaitUntil(() => t, PlayerLoopTiming.EarlyUpdate);
 
+            // 计算帧数差异
             var diff = Time.frameCount - startFrame;
+            // 断言帧数差异是否为11
             diff.Should().Be(11);
         });
 
         [UnityTest]
+        // 使用 UnityTest 标记，表示这是一个 Unity 测试方法
         public IEnumerator WaitWhile() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
             bool t = true;
 
+            // 延迟10帧后将 t 设置为 false
             UniTask.DelayFrame(10, PlayerLoopTiming.PostLateUpdate).ContinueWith(() => t = false).Forget();
 
+            // 记录开始帧数
             var startFrame = Time.frameCount;
+            // 等待直到 t 变为 false，等待期间检查 EarlyUpdate 阶段
             await UniTask.WaitWhile(() => t, PlayerLoopTiming.EarlyUpdate);
 
+            // 计算帧数差异
             var diff = Time.frameCount - startFrame;
+            // 断言帧数差异是否为11
             diff.Should().Be(11);
         });
 
