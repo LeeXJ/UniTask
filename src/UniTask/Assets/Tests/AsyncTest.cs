@@ -103,35 +103,51 @@ namespace Cysharp.Threading.TasksTests
 #endif
 
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator DelayIgnore() => UniTask.ToCoroutine(async () =>
         {
+            // 在异步方法中执行测试
+            // 记录开始时间
             var time = Time.realtimeSinceStartup;
 
+            // 缩小时间缩放系数以减慢时间流逝
             Time.timeScale = 0.5f;
             try
             {
+                // 等待3秒钟，忽略时间缩放
                 await UniTask.Delay(TimeSpan.FromSeconds(3), ignoreTimeScale: true);
 
+                // 计算经过的时间
                 var elapsed = Time.realtimeSinceStartup - time;
+
+                // 断言实际经过的时间是否为3秒钟
+                // 这里使用了 Math.Round 方法将经过的时间四舍五入到最接近的整数秒，并将其与3进行比较
                 ((int)Math.Round(TimeSpan.FromSeconds(elapsed).TotalSeconds, MidpointRounding.ToEven)).Should().Be(3);
             }
             finally
             {
+                // 恢复时间缩放系数为正常值
                 Time.timeScale = 1.0f;
             }
         });
 
         [UnityTest]
+        // 使用UnityTest标记，表示这是一个Unity测试方法
         public IEnumerator WhenAll() => UniTask.ToCoroutine(async () =>
         {
-            var a = UniTask.FromResult(999);
-            var b = UniTask.Yield(PlayerLoopTiming.Update, CancellationToken.None).AsAsyncUnitUniTask();
-            var c = UniTask.DelayFrame(99).AsAsyncUnitUniTask();
+            // 在异步方法中执行测试
+            // 创建三个不同的UniTask，分别表示任务a、b、c
+            var a = UniTask.FromResult(999); // 创建一个已完成的UniTask，结果为999
+            var b = UniTask.Yield(PlayerLoopTiming.Update, CancellationToken.None).AsAsyncUnitUniTask(); // 创建一个在Update阶段暂停的UniTask
+            var c = UniTask.DelayFrame(99).AsAsyncUnitUniTask(); // 创建一个在99帧后完成的UniTask
 
+            // 使用UniTask.WhenAll同时等待多个任务的完成
             var (a2, b2, c2) = await UniTask.WhenAll(a, b, c);
-            a2.Should().Be(999);
-            b2.Should().Be(AsyncUnit.Default);
-            c2.Should().Be(AsyncUnit.Default);
+
+            // 断言每个任务的结果是否符合预期
+            a2.Should().Be(999); // 任务a的结果应为999
+            b2.Should().Be(AsyncUnit.Default); // 任务b应为已完成状态
+            c2.Should().Be(AsyncUnit.Default); // 任务c应为已完成状态
         });
 
         [UnityTest]
